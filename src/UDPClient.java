@@ -77,7 +77,7 @@ public class UDPClient {
                 for (int i = 0; i < response.length; i++) {
                     builder.append(response[i]);
                     if (i < response.length - 1) {
-                        builder.append(",");
+                        builder.append(", ");
                     }
                 }
                 String flightids = builder.toString();
@@ -256,16 +256,11 @@ public class UDPClient {
 
         // bytes for request ID
         byte[] reqID_bytes = ByteBuffer.allocate(4).putInt(reqID).array();
-        // System.out.println(Arrays.toString(reqID_bytes));
 
         // bytes for service ID
         byte[] serviceID_bytes = ByteBuffer.allocate(4).putInt(serviceID).array();
-        // System.out.println(Arrays.toString(serviceID_bytes));
 
-        // bytes for message
-        // byte[] msg_bytes = msg.getBytes(StandardCharsets.UTF_8);
-        // System.out.println(Arrays.toString(msg_bytes));
-
+        // combine
         byte[] FullByteArray = new byte[reqID_bytes.length + serviceID_bytes.length + msg_bytes.length];
 
         ByteBuffer buff = ByteBuffer.wrap(FullByteArray);
