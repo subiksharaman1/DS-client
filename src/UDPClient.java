@@ -297,15 +297,15 @@ public class UDPClient
 
     }
     
-    public static void main(String[] args){
-        try {
-            UDPClient udpClient = new UDPClient(1234);
-            udpClient.findFlights();
+    // public static void main(String[] args){
+    //     try {
+    //         UDPClient udpClient = new UDPClient(1234);
+    //         udpClient.findFlights();
             
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+    //     } catch (Exception e) {
+    //         e.printStackTrace();
+    //     }
+    // }
 }
 
 
