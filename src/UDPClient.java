@@ -195,7 +195,7 @@ public class UDPClient {
 
         // obtain flightID
         System.out.println("Please input the Flight ID: ");
-        int flightID = UIUtils.checkIntInput();
+        int flight_id = UIUtils.checkIntInput();
 
         // obtain monitor interval
         System.out.println("Until when would you like to receive updates on seat availability?");
@@ -203,18 +203,17 @@ public class UDPClient {
         String monitorInterval = UIUtils.checkStringInput();
             
         try {
-
             // parse monitorInterval for date and convert to unixTime
             DateFormat dateFormat = new SimpleDateFormat("dd/mm/yy");
             Date date = dateFormat.parse(monitorInterval);
-            long unixTime = (long) date.getTime()/1000;
+            long unixTime = date.getTime()/1000;
 
             System.out.println("Registering you for updates...");
 
             // combine flightID and unixTime into msg byte array here
             ByteBuffer msg_bytes = ByteBuffer.allocate(12);
-            msg_bytes.putInt(flightID);
-            msg_bytes.putLong(unixTime);
+            msg_bytes  = UIUtils.marshalInt(msg_bytes, flight_id);
+            msg_bytes = UIUtils.marshalLong(msg_bytes, unixTime);
             byte[] byteArray = msg_bytes.array();
             System.out.println("Message: " + Arrays.toString(byteArray));
 
@@ -224,10 +223,14 @@ public class UDPClient {
             byte[] response_msg = sendMessage(request_msg);
 
             // unmarshal response from server and display
-            System.out.println("RequestID: " + response_msg[3]);
-            System.out.println("Response message: " + response_msg[4]);
+            int req_id = UIUtils.extractReqId(response_msg);
+            byte[] payload = UIUtils.extractPayload(response_msg);
+            System.out.println("RequestID: " + req_id);
+            System.out.println("Length of response: " + Arrays.toString(payload));
 
-            if (response_msg[4] == 1){
+            int response = UIUtils.unmarshalInt(payload);
+
+            if (response == 1){
                 System.out.println("Successfully registered for updates! We'll keep you posted.");
             }
             else{
@@ -235,7 +238,7 @@ public class UDPClient {
             }
             
         } catch (PatternSyntaxException e) {
-            System.out.println("No flight was found with Flight ID " + flightID);
+            System.out.println("No flight was found with Flight ID " + flight_id);
             System.out.println("The flight is fully booked!");
         } catch (ParseException e){
             System.out.println("Invalid date! Please enter a valid date.");
