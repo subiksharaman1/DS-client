@@ -8,10 +8,6 @@ public class UIUtils {
 	public static String checkStringInput() {
 		try {
 			String input = sc.nextLine();
-			while (input.equals("")) {
-				System.out.println("Input is empty! Please try again.");
-				input = sc.nextLine();
-			}
 			return input;
 		} catch (Exception e) {
 			System.out.println("Input is invalid! Please try again.");
@@ -22,6 +18,7 @@ public class UIUtils {
 	public static int checkIntInput() {
 		try {
 			int input = sc.nextInt();
+			sc.nextLine();
 			return input;
 		} catch (Exception e) {
 			System.out.println("Input is invalid! Please try again.");
@@ -48,6 +45,12 @@ public class UIUtils {
 	public static int unmarshalInt(byte[] input) {
 		ByteBuffer buffer = ByteBuffer.wrap(input, 0, 4);
 		int value = buffer.getInt();
+		return value;
+	}
+
+	public static long unmarshalLong(byte[] input) {
+		ByteBuffer buffer = ByteBuffer.wrap(input, 0, 8);
+		long value = buffer.getLong();
 		return value;
 	}
 }

@@ -67,14 +67,12 @@ public class UDPClient {
         slice = new byte[response_msg.length - 4];
         buffer.get(slice);
         int[] response = UIUtils.unmarshalIntArray(slice);
-        System.out.println("Length of response: " + response.length);
 
         String res_str = new String(response_msg, 8, response_msg[7], StandardCharsets.UTF_8);
         System.out.println("Request ID:" + req_id);
         System.out.println("Response message: " + Arrays.toString(response));
 
         try {
-            String[] split_res = res_str.split("\0");
             if (response.length > 0) {
                 StringBuilder builder = new StringBuilder();
                 for (int i = 0; i < response.length; i++) {
@@ -99,15 +97,13 @@ public class UDPClient {
 
         // obtain flightID
         System.out.println("Please input the Flight ID: ");
-        String flightID = UIUtils.checkStringInput();
-        int flightID_len = flightID.getBytes().length;
+        int flightID = UIUtils.checkIntInput();
 
         System.out.println("Retrieving flight information...");
 
-        // put flightID_len and flightID into msg byte array here
-        ByteBuffer msg_bytes = ByteBuffer.allocate(4 + flightID_len);
-        msg_bytes.putInt(flightID_len);
-        msg_bytes.put(flightID.getBytes(StandardCharsets.UTF_8));
+        // put flightID into msg byte array
+        ByteBuffer msg_bytes = ByteBuffer.allocate(4);
+        msg_bytes.putInt(flightID);
         byte[] byteArray = msg_bytes.array();
         System.out.println("Message: " + Arrays.toString(byteArray));
 
@@ -119,12 +115,11 @@ public class UDPClient {
         // unmarshal response from server and display
         // System.out.println(response_msg.toString());
         System.out.println("RequestID: " + response_msg[3]);
-        System.out.println("Length of response: " + response_msg[7]);
-        String res_str = new String(response_msg, 8, response_msg[7], StandardCharsets.UTF_8);
-        System.out.println("Response message: " + res_str);
+        String res_str = new String(response_msg, 8, 20, StandardCharsets.UTF_8);
+        System.out.println("Response message: " + );
 
         try {
-            String[] split_res = res_str.split("\0");
+            
             System.out.println("FLIGHT ID: " + flightID);
             System.out.println("Departure Time: " + split_res[0]);
             System.out.println("Airfare: " + split_res[1]);
@@ -204,11 +199,11 @@ public class UDPClient {
         System.out.println("Until when would you like to receive updates on seat availability?");
         System.out.println("Please input your response in DD/MM/YY format.");
         String monitorInterval = UIUtils.checkStringInput();
-        
+            
         try {
 
             // parse monitorInterval for date and convert to unixTime
-            DateFormat dateFormat = new SimpleDateFormat("dd/MM/yy");
+            DateFormat dateFormat = new SimpleDateFormat("dd/mm/yy");
             Date date = dateFormat.parse(monitorInterval);
             long unixTime = (long) date.getTime()/1000;
 
@@ -230,8 +225,13 @@ public class UDPClient {
             System.out.println("RequestID: " + response_msg[3]);
             System.out.println("Response message: " + response_msg[4]);
 
-            System.out.println("Successfully registered for updates! We'll keep you posted.");
-
+            if (response_msg[4] == 1){
+                System.out.println("Successfully registered for updates! We'll keep you posted.");
+            }
+            else{
+                System.out.println("Unable to register. Please try again!");
+            }
+            
         } catch (PatternSyntaxException e) {
             System.out.println("No flight was found with Flight ID " + flightID);
             System.out.println("The flight is fully booked!");
@@ -297,6 +297,7 @@ public class UDPClient {
                     clientSocket.send(rqpacket);
                 }
             }
+
             System.out.println("Response returned: " + Arrays.toString(rspacket.getData()));
             return rspacket.getData();
         } catch (IOException ioe) {
