@@ -64,11 +64,11 @@ public class UDPClient {
         slice = new byte[response_msg.length - 4];
         buffer.get(slice);
         int[] response = UIUtils.unmarshalIntArray(slice);
-        System.out.println("Length of response: " + slice);
+        System.out.println("Length of response: " + response.length);
 
         String res_str = new String(response_msg, 8, response_msg[7], StandardCharsets.UTF_8);
         System.out.println("Request ID:" + req_id);
-        System.out.println("Response message: " + response);
+        System.out.println("Response message: " + Arrays.toString(response));
 
         try {
             String[] split_res = res_str.split("\0");
@@ -302,7 +302,7 @@ public class UDPClient {
                     clientSocket.send(rqpacket);
                 }
             }
-            System.out.println("Response returned: " + rspacket.getData());
+            System.out.println("Response returned: " + Arrays.toString(rspacket.getData()));
             return rspacket.getData();
         } catch (IOException ioe) {
             ioe.printStackTrace();
