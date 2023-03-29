@@ -26,6 +26,21 @@ public class UIUtils {
 		}
 	}
 
+	public static int extractReqId(byte[] input) {
+		ByteBuffer buffer = ByteBuffer.wrap(input, 0, 4);
+        byte[] slice = new byte[4];
+        buffer.get(slice);
+        int req_id = unmarshalInt(slice);
+		return req_id;
+	}
+
+	public static byte[] extractPayload(byte[] input) {
+		ByteBuffer buffer = ByteBuffer.wrap(input, 4, input.length - 4);
+        byte[] slice = new byte[input.length - 4];
+        buffer.get(slice);
+		return slice;
+	}
+
 	public static int[] unmarshalIntArray(byte[] input) {
 		ByteBuffer buffer = ByteBuffer.wrap(input, 0, 4);
 		byte[] slice = new byte[4];
@@ -51,6 +66,12 @@ public class UIUtils {
 	public static long unmarshalLong(byte[] input) {
 		ByteBuffer buffer = ByteBuffer.wrap(input, 0, 8);
 		long value = buffer.getLong();
+		return value;
+	}
+
+	public static double unmarshalDouble(byte[] input) {
+		ByteBuffer buffer = ByteBuffer.wrap(input, 0, 8);
+		double value = buffer.getDouble();
 		return value;
 	}
 }

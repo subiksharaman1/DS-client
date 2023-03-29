@@ -3,12 +3,12 @@ import java.lang.*;
 import java.net.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.security.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.PatternSyntaxException;
-
 /**
  * Functionality of UDP Client
  */
@@ -68,7 +68,6 @@ public class UDPClient {
         buffer.get(slice);
         int[] response = UIUtils.unmarshalIntArray(slice);
 
-        String res_str = new String(response_msg, 8, response_msg[7], StandardCharsets.UTF_8);
         System.out.println("Request ID:" + req_id);
         System.out.println("Response message: " + Arrays.toString(response));
 
@@ -114,19 +113,31 @@ public class UDPClient {
 
         // unmarshal response from server and display
         // System.out.println(response_msg.toString());
-        System.out.println("RequestID: " + response_msg[3]);
-        String res_str = new String(response_msg, 8, 20, StandardCharsets.UTF_8);
-        System.out.println("Response message: " + );
+
+        int req_id = UIUtils.extractReqId(response_msg);
+        byte[] payload = UIUtils.extractPayload(response_msg);
+        System.out.println("RequestID: " + req_id);
+        System.out.println("Response message: " + Arrays.toString(payload));
 
         try {
-            
-            System.out.println("FLIGHT ID: " + flightID);
-            System.out.println("Departure Time: " + split_res[0]);
-            System.out.println("Airfare: " + split_res[1]);
-            System.out.println("Seat Availability: " + split_res[2]);
-            for (String s : split_res) {
-                System.out.println(s);
-            }
+            ByteBuffer buffer = ByteBuffer.wrap(payload, 0, 8);
+            byte[] slice = new byte[8];
+            buffer.get(slice);
+            long departure_time = UIUtils.unmarshalLong(slice);
+
+            buffer = ByteBuffer.wrap(payload, 8, 16);
+            slice = new byte[8];
+            buffer.get(slice);
+            double price = UIUtils.unmarshalDouble(slice);
+
+            buffer = ByteBuffer.wrap(payload, 16, 20);
+            slice = new byte[4];
+            buffer.get(slice);
+            int seats_left = UIUtils.unmarshalInt(slice);
+
+            System.out.println("Departure Time: " + new java.util.Date(departure_time*1000));
+            System.out.println("Airfare: " + price);
+            System.out.println("Seat Availability: " + seats_left);
         } catch (PatternSyntaxException e) {
             System.out.println("No flight was found with Flight ID " + flightID);
         }
@@ -164,23 +175,16 @@ public class UDPClient {
 
         // unmarshal response from server and display
         // System.out.println(response_msg.toString());
-        System.out.println("RequestID: " + response_msg[3]);
-        System.out.println("Length of response: " + response_msg[7]);
-
-        String res_str = new String(response_msg, 8, response_msg[7], StandardCharsets.UTF_8);
-        System.out.println("Response message: " + res_str);
+        int req_id = UIUtils.extractReqId(response_msg);
+        byte[] payload = UIUtils.extractPayload(response_msg);
+        System.out.println("RequestID: " + req_id);
+        System.out.println("Length of response: " + payload);
 
         // TODO: edit below section (try catch) to display ACK or display different
         // error messages
         try {
-            String[] split_res = res_str.split("\0");
-            System.out.println("FLIGHT ID: " + flightID);
-            System.out.println("Departure Time: " + split_res[0]);
-            System.out.println("Airfare: " + split_res[1]);
-            System.out.println("Seat Availability: " + split_res[2]);
-            for (String s : split_res) {
-                System.out.println(s);
-            }
+            int[] seats = UIUtils.unmarshalIntArray(payload);
+            System.out.println("Success! Your seats are:" + Arrays.toString(seats));
         } catch (PatternSyntaxException e) {
             System.out.println("No flight was found with Flight ID " + flightID);
             System.out.println("The flight is fully booked!");
