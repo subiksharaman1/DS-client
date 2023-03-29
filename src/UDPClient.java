@@ -3,6 +3,9 @@ import java.lang.*;
 import java.net.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.PatternSyntaxException;
 
@@ -195,25 +198,28 @@ public class UDPClient {
 
         // obtain flightID
         System.out.println("Please input the Flight ID: ");
-        String flightID = UIUtils.checkStringInput();
-        int flightID_len = flightID.getBytes().length;
+        int flightID = UIUtils.checkIntInput();
 
         // obtain monitor interval
-        System.out.println("How often would you like to receive updates on seat availability?");
-        System.out.println("Please input your response in hours.");
-        int monitorInterval = UIUtils.checkIntInput();
-        int monitorInterval_len = 4;
+        System.out.println("Until when would you like to receive updates on seat availability?");
+        System.out.println("Please input your response in DD/MM/YY format.");
+        String monitorInterval = UIUtils.checkStringInput();
+        
+        try {
 
-        System.out.println("Registering you for updates...");
+            // parse monitorInterval for date and convert to unixTime
+            DateFormat dateFormat = new SimpleDateFormat("dd/MM/yy");
+            Date date = dateFormat.parse(monitorInterval);
+            long unixTime = (long) date.getTime()/1000;
 
-        // combine flightID and monitorInterval into msg byte array here
-        ByteBuffer msg_bytes = ByteBuffer.allocate(4 + flightID_len + 4 + monitorInterval_len);
-        msg_bytes.putInt(flightID_len);
-        msg_bytes.put(flightID.getBytes(StandardCharsets.UTF_8));
-        msg_bytes.putInt(monitorInterval_len);
-        msg_bytes.putInt(monitorInterval);
-        byte[] byteArray = msg_bytes.array();
-        System.out.println("Message: " + Arrays.toString(byteArray));
+            System.out.println("Registering you for updates...");
+
+            // combine flightID and unixTime into msg byte array here
+            ByteBuffer msg_bytes = ByteBuffer.allocate(12);
+            msg_bytes.putInt(flightID);
+            msg_bytes.putLong(unixTime);
+            byte[] byteArray = msg_bytes.array();
+            System.out.println("Message: " + Arrays.toString(byteArray));
 
         // update requestID, marshal and send request to server
         reqID++;
@@ -228,9 +234,6 @@ public class UDPClient {
         String res_str = new String(response_msg, 8, response_msg[7], StandardCharsets.UTF_8);
         System.out.println("Response message: " + res_str);
 
-        // TODO: edit below section (try catch) to display ACK or display different
-        // error messages
-        try {
             String[] split_res = res_str.split("\0");
             System.out.println("FLIGHT ID: " + flightID);
             System.out.println("Departure Time: " + split_res[0]);
@@ -242,6 +245,8 @@ public class UDPClient {
         } catch (PatternSyntaxException e) {
             System.out.println("No flight was found with Flight ID " + flightID);
             System.out.println("The flight is fully booked!");
+        } catch (ParseException e){
+            System.out.println("Invalid date! Please enter a valid date.");
         }
     }
 
