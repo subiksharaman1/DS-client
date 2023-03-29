@@ -176,15 +176,15 @@ public class UDPClient {
         byte[] payload = UIUtils.extractPayload(response_msg);
         System.out.println("RequestID: " + req_id);
         System.out.println("Length of response: " + payload);
+        
+        // unmarshal payload
+        int[] seats = UIUtils.unmarshalIntArray(payload);
 
-        // TODO: edit below section (try catch) to display ACK or display different
-        // error messages
-        try {
-            int[] seats = UIUtils.unmarshalIntArray(payload);
-            System.out.println("Success! Your seats are:" + Arrays.toString(seats));
-        } catch (PatternSyntaxException e) {
-            System.out.println("No flight was found with Flight ID " + flight_id);
+        if (seats.length == 0){
             System.out.println("The flight is fully booked!");
+        }
+        else{
+            System.out.println("Success! Your seats are:" + Arrays.toString(seats));
         }
     }
 
