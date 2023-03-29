@@ -136,7 +136,7 @@ public class UDPClient {
             int seats_left = UIUtils.unmarshalInt(slice);
 
             System.out.println("Departure Time: " + new java.util.Date(departure_time*1000));
-            System.out.println("Airfare: " + price);
+            System.out.println("Airfare: $" + (double) Math.round(price*100)/100);
             System.out.println("Seat Availability: " + seats_left);
         } catch (PatternSyntaxException e) {
             System.out.println("No flight was found with Flight ID " + flightID);
@@ -250,7 +250,7 @@ public class UDPClient {
 
     }
 
-    public byte[] marshal(byte[] msg_bytes, int reqID, int serviceID) {
+    private byte[] marshal(byte[] msg_bytes, int reqID, int serviceID) {
 
         // bytes for request ID
         byte[] reqID_bytes = ByteBuffer.allocate(4).putInt(reqID).array();
