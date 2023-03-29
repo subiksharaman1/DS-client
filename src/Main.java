@@ -51,8 +51,8 @@ public class Main {
 		"2) Check flight details\n" +
 		"3) Reserve flight seats\n" +
 		"4) Monitor flight updates\n" +
-		"5) Idempotent\n" +
-		"6) Non-idempotent\n" +
+		"5) Check Seats Reserved\n" +
+		"6) Refund Seat\n" +
         "7) Quit\n" +
 		"---------------------------------------\n";
 
@@ -66,8 +66,9 @@ public class Main {
 		
         // initialize Scanner to process user input
         Scanner sc = new Scanner(System.in);
-
-		boolean quit = false;         
+		
+		client.clearCache();
+		boolean quit = false;
 		while (!quit) {
             System.out.print(MENU);
             int selection = sc.nextInt();
@@ -85,12 +86,13 @@ public class Main {
                 client.monitorUpdates();
                 break;
             case 5:
-                client.idempotent();
+                client.getSeatsById();
                 break;
             case 6:
-                client.nonidempotent();
+                client.refundSeatBySeatNumAndId();
                 break;
             case 7:
+				client.clearCache();
                 quit = true;
 				break;
             default:

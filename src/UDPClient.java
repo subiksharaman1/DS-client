@@ -9,6 +9,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.PatternSyntaxException;
+
 /**
  * Functionality of UDP Client
  */
@@ -26,7 +27,6 @@ public class UDPClient {
     }
 
     public void findFlights() {
-
         final int serviceID = 1;
 
         // obtain source
@@ -81,7 +81,8 @@ public class UDPClient {
                     }
                 }
                 String flightids = builder.toString();
-                System.out.println("The following flights ids fly from " + source + " to " + destination + ": " + flightids);
+                System.out.println(
+                        "The following flights ids fly from " + source + " to " + destination + ": " + flightids);
             } else {
                 System.out.println("No flights were found to fly from " + source + " to " + destination);
             }
@@ -91,7 +92,6 @@ public class UDPClient {
     }
 
     public void checkFlightDetails() {
-
         final int serviceID = 2;
 
         // obtain flightID
@@ -135,8 +135,8 @@ public class UDPClient {
             buffer.get(slice);
             int seats_left = UIUtils.unmarshalInt(slice);
 
-            System.out.println("Departure Time: " + new java.util.Date(departure_time*1000));
-            System.out.println("Airfare: $" + (double) Math.round(price*100)/100);
+            System.out.println("Departure Time: " + new java.util.Date(departure_time * 1000));
+            System.out.println("Airfare: $" + (double) Math.round(price * 100) / 100);
             System.out.println("Seat Availability: " + seats_left);
         } catch (PatternSyntaxException e) {
             System.out.println("No flight was found with Flight ID " + flightID);
@@ -144,7 +144,6 @@ public class UDPClient {
     }
 
     public void reserveSeats() {
-
         final int serviceID = 3;
 
         // obtain flightID
@@ -158,7 +157,7 @@ public class UDPClient {
         System.out.println("Reserving your seats...");
 
         // combine flightID and numSeats into msg byte array here
-        
+
         ByteBuffer msg_bytes = ByteBuffer.allocate(8);
         msg_bytes = UIUtils.marshalInt(msg_bytes, flight_id);
         msg_bytes = UIUtils.marshalInt(msg_bytes, numSeats);
@@ -190,7 +189,6 @@ public class UDPClient {
     }
 
     public void monitorUpdates() {
-
         final int serviceID = 4;
 
         // obtain flightID
@@ -201,18 +199,18 @@ public class UDPClient {
         System.out.println("Until when would you like to receive updates on seat availability?");
         System.out.println("Please input your response in DD/MM/YY format.");
         String monitorInterval = UIUtils.checkStringInput();
-            
+
         try {
             // parse monitorInterval for date and convert to unixTime
             DateFormat dateFormat = new SimpleDateFormat("dd/mm/yy");
             Date date = dateFormat.parse(monitorInterval);
-            long unixTime = date.getTime()/1000;
+            long unixTime = date.getTime() / 1000;
 
             System.out.println("Registering you for updates...");
 
             // combine flightID and unixTime into msg byte array here
             ByteBuffer msg_bytes = ByteBuffer.allocate(12);
-            msg_bytes  = UIUtils.marshalInt(msg_bytes, flight_id);
+            msg_bytes = UIUtils.marshalInt(msg_bytes, flight_id);
             msg_bytes = UIUtils.marshalLong(msg_bytes, unixTime);
             byte[] byteArray = msg_bytes.array();
             System.out.println("Message: " + Arrays.toString(byteArray));
@@ -230,31 +228,102 @@ public class UDPClient {
 
             int response = UIUtils.unmarshalInt(payload);
 
-            if (response == 1){
+            if (response == 1) {
                 System.out.println("Successfully registered for updates! We'll keep you posted.");
-            }
-            else{
+            } else {
                 System.out.println("Unable to register. Please try again!");
             }
-            
+
         } catch (PatternSyntaxException e) {
             System.out.println("No flight was found with Flight ID " + flight_id);
             System.out.println("The flight is fully booked!");
-        } catch (ParseException e){
+        } catch (ParseException e) {
             System.out.println("Invalid date! Please enter a valid date.");
         }
     }
 
-    public void idempotent() {
+    public void getSeatsById() {
+        final int serviceID = 5;
 
+        // obtain flightID
+        System.out.println("Please input the Flight ID: ");
+        int flight_id = UIUtils.checkIntInput();
+
+        ByteBuffer msg_bytes = ByteBuffer.allocate(4);
+        msg_bytes = UIUtils.marshalInt(msg_bytes, flight_id);
+        byte[] byteArray = msg_bytes.array();
+        System.out.println("Message: " + Arrays.toString(byteArray));
+
+        // update requestID, marshal and send request to server
+        reqID++;
+        byte[] request_msg = marshal(byteArray, reqID, serviceID);
+        byte[] response_msg = sendMessage(request_msg);
+
+        // unmarshal response from server and display
+        int req_id = UIUtils.extractReqId(response_msg);
+        byte[] payload = UIUtils.extractPayload(response_msg);
+        System.out.println("RequestID: " + req_id);
+        System.out.println("Length of response: " + Arrays.toString(payload));
+
+        try {
+            int[] seats = UIUtils.unmarshalIntArray(payload);
+            System.out.println("Your seats for flight " + flight_id + " are:" + Arrays.toString(seats));
+        } catch (PatternSyntaxException e) {
+            System.out.println("No flight was found with Flight ID " + flight_id);
+            System.out.println("The flight is fully booked!");
+        }
     }
 
-    public void nonidempotent() {
+    public void refundSeatBySeatNumAndId() {
+        final int serviceID = 6;
 
+        // obtain flightID
+        System.out.println("Please input the Flight ID: ");
+        int flight_id = UIUtils.checkIntInput();
+
+        System.out.println("Which seat would you like to refund?");
+        int seat_number = UIUtils.checkIntInput();
+
+        ByteBuffer msg_bytes = ByteBuffer.allocate(8);
+        msg_bytes = UIUtils.marshalInt(msg_bytes, flight_id);
+        msg_bytes = UIUtils.marshalInt(msg_bytes, seat_number);
+        byte[] byteArray = msg_bytes.array();
+        System.out.println("Message: " + Arrays.toString(byteArray));
+
+        // update requestID, marshal and send request to server
+        reqID++;
+        byte[] request_msg = marshal(byteArray, reqID, serviceID);
+        byte[] response_msg = sendMessage(request_msg);
+
+        // unmarshal response from server and display
+        int req_id = UIUtils.extractReqId(response_msg);
+        byte[] payload = UIUtils.extractPayload(response_msg);
+        System.out.println("RequestID: " + req_id);
+        System.out.println("Length of response: " + Arrays.toString(payload));
+
+        try {
+            int response = UIUtils.unmarshalInt(payload);
+
+            if (response == 1) {
+                System.out.println("Sucessfully refunded! Please come again!");
+            } else {
+                System.out.println("Unable to refund. Please try again!");
+            }
+            
+        } catch (PatternSyntaxException e) {
+            System.out.println("No flight was found with Flight ID " + flight_id);
+        }
+    }
+
+    public void clearCache() {
+        final int serviceID = 7;
+        reqID++;
+
+        byte[] request_msg = marshal(new byte[]{}, reqID, serviceID);
+        byte[] response_msg = sendMessage(request_msg);
     }
 
     private byte[] marshal(byte[] msg_bytes, int reqID, int serviceID) {
-
         // bytes for request ID
         byte[] reqID_bytes = ByteBuffer.allocate(4).putInt(reqID).array();
 
