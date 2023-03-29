@@ -41,6 +41,18 @@ public class UIUtils {
 		return slice;
 	}
 
+	public static ByteBuffer marshalInt(ByteBuffer buffer, int input){
+		buffer.putInt(input);
+		
+		return buffer;
+	}
+
+	public static ByteBuffer marshalLong(ByteBuffer buffer, long input) {
+		buffer.putLong(input);
+		
+		return buffer;
+	}
+
 	public static int[] unmarshalIntArray(byte[] input) {
 		ByteBuffer buffer = ByteBuffer.wrap(input, 0, 4);
 		byte[] slice = new byte[4];

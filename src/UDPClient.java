@@ -149,23 +149,21 @@ public class UDPClient {
 
         // obtain flightID
         System.out.println("Please input the Flight ID: ");
-        String flightID = UIUtils.checkStringInput();
-        int flightID_len = flightID.getBytes().length;
+        int flight_id = UIUtils.checkIntInput();
 
         // obtain numSeats
         System.out.println("How many seats would you like to reserve?");
         int numSeats = UIUtils.checkIntInput();
-        int numSeats_len = 4;
 
         System.out.println("Reserving your seats...");
 
         // combine flightID and numSeats into msg byte array here
-        ByteBuffer msg_bytes = ByteBuffer.allocate(4 + flightID_len + 4 + numSeats_len);
-        msg_bytes.putInt(flightID_len);
-        msg_bytes.put(flightID.getBytes(StandardCharsets.UTF_8));
-        msg_bytes.putInt(numSeats_len);
-        msg_bytes.putInt(numSeats);
+        
+        ByteBuffer msg_bytes = ByteBuffer.allocate(8);
+        msg_bytes = UIUtils.marshalInt(msg_bytes, flight_id);
+        msg_bytes = UIUtils.marshalInt(msg_bytes, numSeats);
         byte[] byteArray = msg_bytes.array();
+
         System.out.println("Message: " + Arrays.toString(byteArray));
 
         // update requestID, marshal and send request to server
@@ -186,7 +184,7 @@ public class UDPClient {
             int[] seats = UIUtils.unmarshalIntArray(payload);
             System.out.println("Success! Your seats are:" + Arrays.toString(seats));
         } catch (PatternSyntaxException e) {
-            System.out.println("No flight was found with Flight ID " + flightID);
+            System.out.println("No flight was found with Flight ID " + flight_id);
             System.out.println("The flight is fully booked!");
         }
     }
