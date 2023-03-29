@@ -1,25 +1,21 @@
 import java.io.*;
-import java.net.*;
 import java.lang.*;
-import java.util.*;
+import java.net.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.TimeoutException;
+import java.util.*;
 import java.util.regex.PatternSyntaxException;
-
-import javax.naming.NameNotFoundException;
 
 /**
  * Functionality of UDP Client
  */
-public class UDPClient
-{
+public class UDPClient {
     private DatagramSocket clientSocket;
     private InetAddress aHost;
     private int port;
     private int reqID;
 
-    public UDPClient(int serverPort) throws SocketException, UnknownHostException{
+    public UDPClient(int serverPort) throws SocketException, UnknownHostException {
         this.clientSocket = new DatagramSocket();
         this.aHost = InetAddress.getByName("127.0.0.1");
         this.port = serverPort;
@@ -32,12 +28,12 @@ public class UDPClient
 
         // obtain source
         System.out.println("Where are you flying from?");
-		String source = UIUtils.checkStringInput();
+        String source = UIUtils.checkStringInput();
         int source_len = source.getBytes().length;
 
         // obtain destination
         System.out.println("Where are you flying to?");
-		String destination = UIUtils.checkStringInput();
+        String destination = UIUtils.checkStringInput();
         int dest_len = destination.getBytes().length;
 
         System.out.println("Searching for flights...");
@@ -52,26 +48,45 @@ public class UDPClient
         System.out.println("Message: " + Arrays.toString(byteArray));
 
         // update requestID, marshal and send request to server
-        reqID++; 
+        reqID++;
         byte[] request_msg = marshal(byteArray, reqID, serviceID);
         byte[] response_msg = sendMessage(request_msg);
 
         // unmarshal response from server and display
         // System.out.println(response_msg.toString());
-        System.out.println("RequestID: " + response_msg[3]);
-        System.out.println("Length of response: " + response_msg[7]);
+        ByteBuffer buffer = ByteBuffer.wrap(response_msg, 0, 4);
+        byte[] slice = new byte[4];
+        buffer.get(slice);
+        int req_id = UIUtils.unmarshalInt(slice);
+        System.out.println("Request: " + Arrays.toString(slice));
+
+        buffer = ByteBuffer.wrap(response_msg, 4, response_msg.length - 4);
+        slice = new byte[response_msg.length - 4];
+        buffer.get(slice);
+        int[] response = UIUtils.unmarshalIntArray(slice);
+        System.out.println("Length of response: " + slice);
 
         String res_str = new String(response_msg, 8, response_msg[7], StandardCharsets.UTF_8);
-        System.out.println("Response message: " + res_str);
-    
+        System.out.println("Request ID:" + req_id);
+        System.out.println("Response message: " + response);
+
         try {
             String[] split_res = res_str.split("\0");
-            System.out.println("The following flights fly from " + source + " to " + destination + ":");
-            for (String s: split_res) {
-                System.out.println(s);
-        }
+            if (response.length > 0) {
+                StringBuilder builder = new StringBuilder();
+                for (int i = 0; i < response.length; i++) {
+                    builder.append(response[i]);
+                    if (i < response.length - 1) {
+                        builder.append(",");
+                    }
+                }
+                String flightids = builder.toString();
+                System.out.println("The following flights ids fly from " + source + " to " + destination + ": " + flightids);
+            } else {
+                System.out.println("No flights were found to fly from " + source + " to " + destination);
+            }
         } catch (PatternSyntaxException e) {
-            System.out.println("No flights were found to fly from " + source + " to " + destination); 
+            System.out.println("No flights were found to fly from " + source + " to " + destination);
         }
     }
 
@@ -81,7 +96,7 @@ public class UDPClient
 
         // obtain flightID
         System.out.println("Please input the Flight ID: ");
-		String flightID = UIUtils.checkStringInput();
+        String flightID = UIUtils.checkStringInput();
         int flightID_len = flightID.getBytes().length;
 
         System.out.println("Retrieving flight information...");
@@ -94,7 +109,7 @@ public class UDPClient
         System.out.println("Message: " + Arrays.toString(byteArray));
 
         // update requestID, marshal and send request to server
-        reqID++; 
+        reqID++;
         byte[] request_msg = marshal(byteArray, reqID, serviceID);
         byte[] response_msg = sendMessage(request_msg);
 
@@ -102,21 +117,20 @@ public class UDPClient
         // System.out.println(response_msg.toString());
         System.out.println("RequestID: " + response_msg[3]);
         System.out.println("Length of response: " + response_msg[7]);
-
         String res_str = new String(response_msg, 8, response_msg[7], StandardCharsets.UTF_8);
         System.out.println("Response message: " + res_str);
-    
+
         try {
             String[] split_res = res_str.split("\0");
             System.out.println("FLIGHT ID: " + flightID);
             System.out.println("Departure Time: " + split_res[0]);
             System.out.println("Airfare: " + split_res[1]);
             System.out.println("Seat Availability: " + split_res[2]);
-            for (String s: split_res) {
+            for (String s : split_res) {
                 System.out.println(s);
-        }
+            }
         } catch (PatternSyntaxException e) {
-            System.out.println("No flight was found with Flight ID " + flightID); 
+            System.out.println("No flight was found with Flight ID " + flightID);
         }
     }
 
@@ -126,7 +140,7 @@ public class UDPClient
 
         // obtain flightID
         System.out.println("Please input the Flight ID: ");
-		String flightID = UIUtils.checkStringInput();
+        String flightID = UIUtils.checkStringInput();
         int flightID_len = flightID.getBytes().length;
 
         // obtain numSeats
@@ -146,7 +160,7 @@ public class UDPClient
         System.out.println("Message: " + Arrays.toString(byteArray));
 
         // update requestID, marshal and send request to server
-        reqID++; 
+        reqID++;
         byte[] request_msg = marshal(byteArray, reqID, serviceID);
         byte[] response_msg = sendMessage(request_msg);
 
@@ -157,19 +171,20 @@ public class UDPClient
 
         String res_str = new String(response_msg, 8, response_msg[7], StandardCharsets.UTF_8);
         System.out.println("Response message: " + res_str);
-    
-        // TODO: edit below section (try catch) to display ACK or display different error messages
+
+        // TODO: edit below section (try catch) to display ACK or display different
+        // error messages
         try {
             String[] split_res = res_str.split("\0");
             System.out.println("FLIGHT ID: " + flightID);
             System.out.println("Departure Time: " + split_res[0]);
             System.out.println("Airfare: " + split_res[1]);
             System.out.println("Seat Availability: " + split_res[2]);
-            for (String s: split_res) {
+            for (String s : split_res) {
                 System.out.println(s);
-        }
+            }
         } catch (PatternSyntaxException e) {
-            System.out.println("No flight was found with Flight ID " + flightID); 
+            System.out.println("No flight was found with Flight ID " + flightID);
             System.out.println("The flight is fully booked!");
         }
     }
@@ -180,7 +195,7 @@ public class UDPClient
 
         // obtain flightID
         System.out.println("Please input the Flight ID: ");
-		String flightID = UIUtils.checkStringInput();
+        String flightID = UIUtils.checkStringInput();
         int flightID_len = flightID.getBytes().length;
 
         // obtain monitor interval
@@ -201,7 +216,7 @@ public class UDPClient
         System.out.println("Message: " + Arrays.toString(byteArray));
 
         // update requestID, marshal and send request to server
-        reqID++; 
+        reqID++;
         byte[] request_msg = marshal(byteArray, reqID, serviceID);
         byte[] response_msg = sendMessage(request_msg);
 
@@ -212,19 +227,20 @@ public class UDPClient
 
         String res_str = new String(response_msg, 8, response_msg[7], StandardCharsets.UTF_8);
         System.out.println("Response message: " + res_str);
-    
-        // TODO: edit below section (try catch) to display ACK or display different error messages
+
+        // TODO: edit below section (try catch) to display ACK or display different
+        // error messages
         try {
             String[] split_res = res_str.split("\0");
             System.out.println("FLIGHT ID: " + flightID);
             System.out.println("Departure Time: " + split_res[0]);
             System.out.println("Airfare: " + split_res[1]);
             System.out.println("Seat Availability: " + split_res[2]);
-            for (String s: split_res) {
+            for (String s : split_res) {
                 System.out.println(s);
-        }
+            }
         } catch (PatternSyntaxException e) {
-            System.out.println("No flight was found with Flight ID " + flightID); 
+            System.out.println("No flight was found with Flight ID " + flightID);
             System.out.println("The flight is fully booked!");
         }
     }
@@ -237,8 +253,8 @@ public class UDPClient
 
     }
 
-    public byte[] marshal(byte[] msg_bytes, int reqID, int serviceID){
-        
+    public byte[] marshal(byte[] msg_bytes, int reqID, int serviceID) {
+
         // bytes for request ID
         byte[] reqID_bytes = ByteBuffer.allocate(4).putInt(reqID).array();
         // System.out.println(Arrays.toString(reqID_bytes));
@@ -263,7 +279,7 @@ public class UDPClient
         return byteArray;
     }
 
-    private byte[] sendMessage(byte[] msg){
+    private byte[] sendMessage(byte[] msg) {
         System.out.println("Request: " + Arrays.toString(msg));
 
         try {
@@ -288,26 +304,20 @@ public class UDPClient
             }
             System.out.println("Response returned: " + rspacket.getData());
             return rspacket.getData();
-        } catch (IOException ioe){
+        } catch (IOException ioe) {
             ioe.printStackTrace();
             return new byte[0];
         }
 
-
-
     }
-    
+
     // public static void main(String[] args){
-    //     try {
-    //         UDPClient udpClient = new UDPClient(1234);
-    //         udpClient.findFlights();
-            
-    //     } catch (Exception e) {
-    //         e.printStackTrace();
-    //     }
+    // try {
+    // UDPClient udpClient = new UDPClient(1234);
+    // udpClient.findFlights();
+
+    // } catch (Exception e) {
+    // e.printStackTrace();
+    // }
     // }
 }
-
-
-
-

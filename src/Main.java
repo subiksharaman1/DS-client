@@ -4,6 +4,7 @@ import java.net.UnknownHostException;
 import java.net.InetSocketAddress;
 import java.util.Scanner;
 
+
 /**
  * Main menu for client: Instantiates instance of UDPClient.
  */
