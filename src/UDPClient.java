@@ -221,27 +221,17 @@ public class UDPClient {
             byte[] byteArray = msg_bytes.array();
             System.out.println("Message: " + Arrays.toString(byteArray));
 
-        // update requestID, marshal and send request to server
-        reqID++;
-        byte[] request_msg = marshal(byteArray, reqID, serviceID);
-        byte[] response_msg = sendMessage(request_msg);
+            // update requestID, marshal and send request to server
+            reqID++;
+            byte[] request_msg = marshal(byteArray, reqID, serviceID);
+            byte[] response_msg = sendMessage(request_msg);
 
-        // unmarshal response from server and display
-        // System.out.println(response_msg.toString());
-        System.out.println("RequestID: " + response_msg[3]);
-        System.out.println("Length of response: " + response_msg[7]);
+            // unmarshal response from server and display
+            System.out.println("RequestID: " + response_msg[3]);
+            System.out.println("Response message: " + response_msg[4]);
 
-        String res_str = new String(response_msg, 8, response_msg[7], StandardCharsets.UTF_8);
-        System.out.println("Response message: " + res_str);
+            System.out.println("Successfully registered for updates! We'll keep you posted.");
 
-            String[] split_res = res_str.split("\0");
-            System.out.println("FLIGHT ID: " + flightID);
-            System.out.println("Departure Time: " + split_res[0]);
-            System.out.println("Airfare: " + split_res[1]);
-            System.out.println("Seat Availability: " + split_res[2]);
-            for (String s : split_res) {
-                System.out.println(s);
-            }
         } catch (PatternSyntaxException e) {
             System.out.println("No flight was found with Flight ID " + flightID);
             System.out.println("The flight is fully booked!");
