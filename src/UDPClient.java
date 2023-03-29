@@ -236,7 +236,6 @@ public class UDPClient {
 
         } catch (PatternSyntaxException e) {
             System.out.println("No flight was found with Flight ID " + flight_id);
-            System.out.println("The flight is fully booked!");
         } catch (ParseException e) {
             System.out.println("Invalid date! Please enter a valid date.");
         }
