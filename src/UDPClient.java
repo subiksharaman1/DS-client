@@ -46,7 +46,6 @@ public class UDPClient {
         msg_bytes.putInt(dest_len);
         msg_bytes.put(destination.getBytes(StandardCharsets.UTF_8));
         byte[] byteArray = msg_bytes.array();
-        System.out.println("Message: " + Arrays.toString(byteArray));
 
         // update requestID, marshal and send request to server
         reqID++;
@@ -60,7 +59,6 @@ public class UDPClient {
         byte[] payload = UIUtils.extractPayload(response_msg);
         System.out.println("RequestID: " + req_id);
         System.out.println("StatusCode: " + status_code);
-        System.out.println("Response message: " + Arrays.toString(payload));
 
         try {
             int[] flightidsarray = UIUtils.unmarshalIntArray(payload);
@@ -74,11 +72,11 @@ public class UDPClient {
                 }
                 String flightids = builder.toString();
                 System.out.println(
-                        "The following flights ids fly from " + source + " to " + destination + ": " + flightids);
+                        "The following flight IDs fly from " + source + " to " + destination + ": " + flightids);
             } else {
                 System.out.println("No flights were found to fly from " + source + " to " + destination);
             }
-        } catch (PatternSyntaxException e) {
+        } catch (Exception e) {
             System.out.println("No flights were found to fly from " + source + " to " + destination);
         }
     }
@@ -96,7 +94,6 @@ public class UDPClient {
         ByteBuffer msg_bytes = ByteBuffer.allocate(4);
         msg_bytes.putInt(flightID);
         byte[] byteArray = msg_bytes.array();
-        System.out.println("Message: " + Arrays.toString(byteArray));
 
         // update requestID, marshal and send request to server
         reqID++;
@@ -111,7 +108,6 @@ public class UDPClient {
         byte[] payload = UIUtils.extractPayload(response_msg);
         System.out.println("RequestID: " + req_id);
         System.out.println("StatusCode: " + status_code);
-        System.out.println("Response message: " + Arrays.toString(payload));
 
         try {
             ByteBuffer buffer = ByteBuffer.wrap(payload, 0, 8);
@@ -132,7 +128,7 @@ public class UDPClient {
             System.out.println("Departure Time: " + new java.util.Date(departure_time * 1000));
             System.out.println("Airfare: $" + (double) Math.round(price * 100) / 100);
             System.out.println("Seat Availability: " + seats_left);
-        } catch (PatternSyntaxException e) {
+        } catch (Exception e) {
             System.out.println("No flight was found with Flight ID " + flightID);
         }
     }
@@ -158,8 +154,6 @@ public class UDPClient {
             msg_bytes = UIUtils.marshalInt(msg_bytes, numSeats);
             byte[] byteArray = msg_bytes.array();
 
-            System.out.println("Message: " + Arrays.toString(byteArray));
-
             // update requestID, marshal and send request to server
             reqID++;
             byte[] request_msg = marshal(byteArray, reqID, serviceID);
@@ -172,7 +166,6 @@ public class UDPClient {
             byte[] payload = UIUtils.extractPayload(response_msg);
             System.out.println("RequestID: " + req_id);
             System.out.println("StatusCode: " + status_code);
-            System.out.println("Response message: " + Arrays.toString(payload));
 
             // unmarshal payload
             int[] seats = UIUtils.unmarshalIntArray(payload);
@@ -213,7 +206,6 @@ public class UDPClient {
             msg_bytes = UIUtils.marshalInt(msg_bytes, flight_id);
             msg_bytes = UIUtils.marshalLong(msg_bytes, unixTime);
             byte[] byteArray = msg_bytes.array();
-            System.out.println("Message: " + Arrays.toString(byteArray));
 
             // update requestID, marshal and send request to server
             reqID++;
@@ -226,7 +218,6 @@ public class UDPClient {
             byte[] payload = UIUtils.extractPayload(response_msg);
             System.out.println("RequestID: " + req_id);
             System.out.println("StatusCode: " + status_code);
-            System.out.println("Response message: " + Arrays.toString(payload));
 
             int response = UIUtils.unmarshalInt(payload);
 
@@ -235,11 +226,10 @@ public class UDPClient {
             } else {
                 System.out.println("Unable to register. Please try again!");
             }
-
-        } catch (PatternSyntaxException e) {
-            System.out.println("No flight was found with Flight ID " + flight_id);
         } catch (ParseException e) {
             System.out.println("Invalid date! Please enter a valid date.");
+        } catch (Exception e) {
+            System.out.println("No flight was found with Flight ID " + flight_id);
         }
     }
 
@@ -253,7 +243,6 @@ public class UDPClient {
         ByteBuffer msg_bytes = ByteBuffer.allocate(4);
         msg_bytes = UIUtils.marshalInt(msg_bytes, flight_id);
         byte[] byteArray = msg_bytes.array();
-        System.out.println("Message: " + Arrays.toString(byteArray));
 
         // update requestID, marshal and send request to server
         reqID++;
@@ -266,14 +255,12 @@ public class UDPClient {
         byte[] payload = UIUtils.extractPayload(response_msg);
         System.out.println("RequestID: " + req_id);
         System.out.println("StatusCode: " + status_code);
-        System.out.println("Response message: " + Arrays.toString(payload));
 
         try {
             int[] seats = UIUtils.unmarshalIntArray(payload);
             System.out.println("Your seats for flight " + flight_id + " are:" + Arrays.toString(seats));
-        } catch (PatternSyntaxException e) {
+        } catch (Exception e) {
             System.out.println("No flight was found with Flight ID " + flight_id);
-            System.out.println("The flight is fully booked!");
         }
     }
 
@@ -291,7 +278,6 @@ public class UDPClient {
         msg_bytes = UIUtils.marshalInt(msg_bytes, flight_id);
         msg_bytes = UIUtils.marshalInt(msg_bytes, seat_number);
         byte[] byteArray = msg_bytes.array();
-        System.out.println("Message: " + Arrays.toString(byteArray));
 
         // update requestID, marshal and send request to server
         reqID++;
@@ -304,7 +290,6 @@ public class UDPClient {
         byte[] payload = UIUtils.extractPayload(response_msg);
         System.out.println("RequestID: " + req_id);
         System.out.println("StatusCode: " + status_code);
-        System.out.println("Response message: " + Arrays.toString(payload));
 
         try {
             int response = UIUtils.unmarshalInt(payload);
@@ -315,7 +300,7 @@ public class UDPClient {
                 System.out.println("Unable to refund. Please try again!");
             }
 
-        } catch (PatternSyntaxException e) {
+        } catch (Exception e) {
             System.out.println("No flight was found with Flight ID " + flight_id);
         }
     }
@@ -364,7 +349,6 @@ public class UDPClient {
                 }
             }
 
-            System.out.println("Response returned: " + Arrays.toString(rspacket.getData()));
             return rspacket.getData();
         } catch (IOException ioe) {
             ioe.printStackTrace();
