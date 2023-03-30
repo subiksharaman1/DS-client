@@ -23,7 +23,7 @@ public class UDPClient {
         this.clientSocket = new DatagramSocket();
         this.aHost = InetAddress.getByName("127.0.0.1");
         this.port = serverPort;
-        this.reqID = 0;
+        this.reqID = UUID.randomUUID().hashCode();
     }
 
     public void findFlights() {
