@@ -28,28 +28,36 @@ public class UIUtils {
 
 	public static int extractReqId(byte[] input) {
 		ByteBuffer buffer = ByteBuffer.wrap(input, 0, 4);
-        byte[] slice = new byte[4];
-        buffer.get(slice);
-        int req_id = unmarshalInt(slice);
+		byte[] slice = new byte[4];
+		buffer.get(slice);
+		int req_id = unmarshalInt(slice);
 		return req_id;
 	}
 
+	public static int extractStatusCode(byte[] input) {
+		ByteBuffer buffer = ByteBuffer.wrap(input, 4, 8);
+		byte[] slice = new byte[4];
+		buffer.get(slice);
+		int status_code = unmarshalInt(slice);
+		return status_code;
+	}
+
 	public static byte[] extractPayload(byte[] input) {
-		ByteBuffer buffer = ByteBuffer.wrap(input, 4, input.length - 4);
-        byte[] slice = new byte[input.length - 4];
-        buffer.get(slice);
+		ByteBuffer buffer = ByteBuffer.wrap(input, 8, input.length - 8);
+		byte[] slice = new byte[input.length - 8];
+		buffer.get(slice);
 		return slice;
 	}
 
-	public static ByteBuffer marshalInt(ByteBuffer buffer, int input){
+	public static ByteBuffer marshalInt(ByteBuffer buffer, int input) {
 		buffer.putInt(input);
-		
+
 		return buffer;
 	}
 
 	public static ByteBuffer marshalLong(ByteBuffer buffer, long input) {
 		buffer.putLong(input);
-		
+
 		return buffer;
 	}
 
@@ -60,8 +68,8 @@ public class UIUtils {
 		int lengthData = unmarshalInt(slice);
 
 		int[] value = new int[lengthData];
-		for (int i =0; i<lengthData; i++){
-			buffer = ByteBuffer.wrap(input, 4+i*4, 8+i*4);
+		for (int i = 0; i < lengthData; i++) {
+			buffer = ByteBuffer.wrap(input, 4 + i * 4, 8 + i * 4);
 			slice = new byte[4];
 			buffer.get(slice);
 			value[i] = unmarshalInt(slice);

@@ -57,26 +57,20 @@ public class UDPClient {
 
         // unmarshal response from server and display
         // System.out.println(response_msg.toString());
-        ByteBuffer buffer = ByteBuffer.wrap(response_msg, 0, 4);
-        byte[] slice = new byte[4];
-        buffer.get(slice);
-        int req_id = UIUtils.unmarshalInt(slice);
-        System.out.println("Request: " + Arrays.toString(slice));
-
-        buffer = ByteBuffer.wrap(response_msg, 4, response_msg.length - 4);
-        slice = new byte[response_msg.length - 4];
-        buffer.get(slice);
-        int[] response = UIUtils.unmarshalIntArray(slice);
-
-        System.out.println("Request ID:" + req_id);
-        System.out.println("Response message: " + Arrays.toString(response));
+        int req_id = UIUtils.extractReqId(response_msg);
+        int status_code = UIUtils.extractStatusCode(response_msg);
+        byte[] payload = UIUtils.extractPayload(response_msg);
+        System.out.println("RequestID: " + req_id);
+        System.out.println("StatusCode: " + status_code);
+        System.out.println("Response message: " + Arrays.toString(payload));
 
         try {
-            if (response.length > 0) {
+            int[] flightidsarray = UIUtils.unmarshalIntArray(payload);
+            if (flightidsarray.length > 0) {
                 StringBuilder builder = new StringBuilder();
-                for (int i = 0; i < response.length; i++) {
-                    builder.append(response[i]);
-                    if (i < response.length - 1) {
+                for (int i = 0; i < flightidsarray.length; i++) {
+                    builder.append(flightidsarray[i]);
+                    if (i < flightidsarray.length - 1) {
                         builder.append(", ");
                     }
                 }
@@ -115,8 +109,10 @@ public class UDPClient {
         // System.out.println(response_msg.toString());
 
         int req_id = UIUtils.extractReqId(response_msg);
+        int status_code = UIUtils.extractStatusCode(response_msg);
         byte[] payload = UIUtils.extractPayload(response_msg);
         System.out.println("RequestID: " + req_id);
+        System.out.println("StatusCode: " + status_code);
         System.out.println("Response message: " + Arrays.toString(payload));
 
         try {
@@ -173,17 +169,18 @@ public class UDPClient {
         // unmarshal response from server and display
         // System.out.println(response_msg.toString());
         int req_id = UIUtils.extractReqId(response_msg);
+        int status_code = UIUtils.extractStatusCode(response_msg);
         byte[] payload = UIUtils.extractPayload(response_msg);
         System.out.println("RequestID: " + req_id);
-        System.out.println("Length of response: " + payload);
-        
+        System.out.println("StatusCode: " + status_code);
+        System.out.println("Response message: " + Arrays.toString(payload));
+
         // unmarshal payload
         int[] seats = UIUtils.unmarshalIntArray(payload);
 
-        if (seats.length == 0){
+        if (seats.length == 0) {
             System.out.println("The flight is fully booked!");
-        }
-        else{
+        } else {
             System.out.println("Success! Your seats are:" + Arrays.toString(seats));
         }
     }
@@ -202,7 +199,7 @@ public class UDPClient {
 
         try {
             // parse monitorInterval for date and convert to unixTime
-            DateFormat dateFormat = new SimpleDateFormat("dd/mm/yy");
+            DateFormat dateFormat = new SimpleDateFormat("dd/MM/yy");
             Date date = dateFormat.parse(monitorInterval);
             long unixTime = date.getTime() / 1000;
 
@@ -222,9 +219,11 @@ public class UDPClient {
 
             // unmarshal response from server and display
             int req_id = UIUtils.extractReqId(response_msg);
+            int status_code = UIUtils.extractStatusCode(response_msg);
             byte[] payload = UIUtils.extractPayload(response_msg);
             System.out.println("RequestID: " + req_id);
-            System.out.println("Length of response: " + Arrays.toString(payload));
+            System.out.println("StatusCode: " + status_code);
+            System.out.println("Response message: " + Arrays.toString(payload));
 
             int response = UIUtils.unmarshalInt(payload);
 
@@ -260,9 +259,11 @@ public class UDPClient {
 
         // unmarshal response from server and display
         int req_id = UIUtils.extractReqId(response_msg);
+        int status_code = UIUtils.extractStatusCode(response_msg);
         byte[] payload = UIUtils.extractPayload(response_msg);
         System.out.println("RequestID: " + req_id);
-        System.out.println("Length of response: " + Arrays.toString(payload));
+        System.out.println("StatusCode: " + status_code);
+        System.out.println("Response message: " + Arrays.toString(payload));
 
         try {
             int[] seats = UIUtils.unmarshalIntArray(payload);
@@ -296,9 +297,11 @@ public class UDPClient {
 
         // unmarshal response from server and display
         int req_id = UIUtils.extractReqId(response_msg);
+        int status_code = UIUtils.extractStatusCode(response_msg);
         byte[] payload = UIUtils.extractPayload(response_msg);
         System.out.println("RequestID: " + req_id);
-        System.out.println("Length of response: " + Arrays.toString(payload));
+        System.out.println("StatusCode: " + status_code);
+        System.out.println("Response message: " + Arrays.toString(payload));
 
         try {
             int response = UIUtils.unmarshalInt(payload);
@@ -308,7 +311,7 @@ public class UDPClient {
             } else {
                 System.out.println("Unable to refund. Please try again!");
             }
-            
+
         } catch (PatternSyntaxException e) {
             System.out.println("No flight was found with Flight ID " + flight_id);
         }
@@ -318,8 +321,10 @@ public class UDPClient {
         final int serviceID = 7;
         reqID++;
 
-        byte[] request_msg = marshal(new byte[]{}, reqID, serviceID);
+        System.out.println("Clearing cache for the user...");
+        byte[] request_msg = marshal(new byte[] {}, reqID, serviceID);
         byte[] response_msg = sendMessage(request_msg);
+        System.out.println("Cache cleared!");
     }
 
     private byte[] marshal(byte[] msg_bytes, int reqID, int serviceID) {
