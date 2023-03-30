@@ -12,15 +12,16 @@ public class UIUtils {
 			System.out.println("Input is invalid! Please try again.");
 			return checkStringInput();
 		}
-	}
+	}	
 
 	public static int checkIntInput() {
 		try {
 			int input = sc.nextInt();
-			sc.nextLine();
+			sc.nextLine(); // consume the newline character
 			return input;
 		} catch (Exception e) {
 			System.out.println("Input is invalid! Please try again.");
+			sc.nextLine(); // consume the invalid input from the input stream
 			return checkIntInput();
 		}
 	}

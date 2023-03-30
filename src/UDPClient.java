@@ -140,47 +140,52 @@ public class UDPClient {
     public void reserveSeats() {
         final int serviceID = 3;
 
-        // obtain flightID
-        System.out.println("Please input the Flight ID: ");
-        int flight_id = UIUtils.checkIntInput();
+        try {
+            // obtain flightID
+            System.out.println("Please input the Flight ID: ");
+            int flight_id = UIUtils.checkIntInput();
 
-        // obtain numSeats
-        System.out.println("How many seats would you like to reserve?");
-        int numSeats = UIUtils.checkIntInput();
+            // obtain numSeats
+            System.out.println("How many seats would you like to reserve?");
+            int numSeats = UIUtils.checkIntInput();
 
-        System.out.println("Reserving your seats...");
+            System.out.println("Reserving your seats...");
 
-        // combine flightID and numSeats into msg byte array here
+            // combine flightID and numSeats into msg byte array here
 
-        ByteBuffer msg_bytes = ByteBuffer.allocate(8);
-        msg_bytes = UIUtils.marshalInt(msg_bytes, flight_id);
-        msg_bytes = UIUtils.marshalInt(msg_bytes, numSeats);
-        byte[] byteArray = msg_bytes.array();
+            ByteBuffer msg_bytes = ByteBuffer.allocate(8);
+            msg_bytes = UIUtils.marshalInt(msg_bytes, flight_id);
+            msg_bytes = UIUtils.marshalInt(msg_bytes, numSeats);
+            byte[] byteArray = msg_bytes.array();
 
-        System.out.println("Message: " + Arrays.toString(byteArray));
+            System.out.println("Message: " + Arrays.toString(byteArray));
 
-        // update requestID, marshal and send request to server
-        reqID++;
-        byte[] request_msg = marshal(byteArray, reqID, serviceID);
-        byte[] response_msg = sendMessage(request_msg);
+            // update requestID, marshal and send request to server
+            reqID++;
+            byte[] request_msg = marshal(byteArray, reqID, serviceID);
+            byte[] response_msg = sendMessage(request_msg);
 
-        // unmarshal response from server and display
-        // System.out.println(response_msg.toString());
-        int req_id = UIUtils.extractReqId(response_msg);
-        int status_code = UIUtils.extractStatusCode(response_msg);
-        byte[] payload = UIUtils.extractPayload(response_msg);
-        System.out.println("RequestID: " + req_id);
-        System.out.println("StatusCode: " + status_code);
-        System.out.println("Response message: " + Arrays.toString(payload));
+            // unmarshal response from server and display
+            // System.out.println(response_msg.toString());
+            int req_id = UIUtils.extractReqId(response_msg);
+            int status_code = UIUtils.extractStatusCode(response_msg);
+            byte[] payload = UIUtils.extractPayload(response_msg);
+            System.out.println("RequestID: " + req_id);
+            System.out.println("StatusCode: " + status_code);
+            System.out.println("Response message: " + Arrays.toString(payload));
 
-        // unmarshal payload
-        int[] seats = UIUtils.unmarshalIntArray(payload);
+            // unmarshal payload
+            int[] seats = UIUtils.unmarshalIntArray(payload);
 
-        if (seats.length == 0) {
-            System.out.println("The flight is fully booked!");
-        } else {
-            System.out.println("Success! Your seats are:" + Arrays.toString(seats));
+            if (seats.length == 0) {
+                System.out.println("The flight is fully booked!");
+            } else {
+                System.out.println("Success! Your seats are:" + Arrays.toString(seats));
+            }
+        } catch (Exception e) {
+            System.out.println("Sorry! You cannot book that many seats at once!");
         }
+        
     }
 
     public void monitorUpdates() {
