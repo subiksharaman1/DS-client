@@ -219,7 +219,7 @@ public class UDPClient {
             System.out.println("RequestID: " + req_id);
             System.out.println("StatusCode: " + status_code);
 
-            int response = UIUtils.unmarshalInt(payload);
+            int response = payload[0];
 
             if (response == 1) {
                 System.out.println("Successfully registered for updates! We'll keep you posted.");
@@ -326,7 +326,6 @@ public class UDPClient {
     }
 
     private byte[] sendMessage(byte[] msg) {
-        System.out.println("Request: " + Arrays.toString(msg));
 
         try {
             // send packet
