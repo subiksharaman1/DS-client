@@ -12,32 +12,6 @@ public class Main {
 		String argServerAddr = "127.0.0.1";
 		int argServerPort = 8888;
 
-		// if (args.length > 0) {
-		// try {
-		// if (args.length == 1) {
-		// argPort = Integer.parseInt(args[0]);
-		// System.out.println("Client port set to: " + argPort);
-		// }
-		// if (args.length == 2) {
-		// argPort = Integer.parseInt(args[0]);
-		// argServerAddr = args[1];
-		// System.out.println("Client port set to " + argPort);
-		// System.out.println("Server address set to " + argServerAddr);
-		// }
-		// if (args.length == 3) {
-		// argPort = Integer.parseInt(args[0]);
-		// argServerAddr = args[1];
-		// argServerPort = Integer.parseInt(args[2]);
-		// System.out.println("Client port set to " + argPort);
-		// System.out.println("Server address set to " + argServerAddr);
-		// System.out.println("Server port set to " + argServerPort);
-		// }
-		// } catch (Exception e) {
-		// System.err.println("Invalid arguments.");
-		// System.exit(1);
-		// }
-		// }
-
 		// menu
 		String MENU = "---------------------------------------\n" +
 				"Distributed Flight Information System\n" +

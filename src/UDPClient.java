@@ -18,10 +18,10 @@ public class UDPClient {
     private int reqID;
 
     public UDPClient(int serverPort) throws SocketException, UnknownHostException {
-        this.clientSocket = new DatagramSocket();
         this.aHost = InetAddress.getByName("127.0.0.1");
         this.port = serverPort;
         this.reqID = Math.abs(UUID.randomUUID().hashCode());
+        this.clientSocket = new DatagramSocket();
     }
 
     public void findFlights() {
@@ -223,6 +223,32 @@ public class UDPClient {
 
             if (response == 1) {
                 System.out.println("Successfully registered for updates! We'll keep you posted.");
+
+                // create a thread to listen for notifications
+                Thread thread = new Thread(() -> {
+                    try {
+                        // create a buffer to store incoming data
+                        byte[] buffer = new byte[1024];
+                        DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+
+                        while (true) {
+                            // wait for incoming datagrams from the server
+                            clientSocket.receive(packet);
+
+                            // convert the received data to a string
+                            String message = new String(packet.getData(), 0, packet.getLength(), "UTF-8");
+
+                            // process notification
+                            System.out.println("Received message from server: " + message);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+
+                // start the thread to listen for notifications
+                thread.start();
+
             } else {
                 System.out.println("Unable to register. Please try again!");
             }
