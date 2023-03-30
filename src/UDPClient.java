@@ -1,9 +1,7 @@
 import java.io.*;
-import java.lang.*;
 import java.net.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.security.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -23,7 +21,7 @@ public class UDPClient {
         this.clientSocket = new DatagramSocket();
         this.aHost = InetAddress.getByName("127.0.0.1");
         this.port = serverPort;
-        this.reqID = UUID.randomUUID().hashCode();
+        this.reqID = Math.abs(UUID.randomUUID().hashCode());
     }
 
     public void findFlights() {
@@ -315,16 +313,6 @@ public class UDPClient {
         } catch (PatternSyntaxException e) {
             System.out.println("No flight was found with Flight ID " + flight_id);
         }
-    }
-
-    public void clearCache() {
-        final int serviceID = 7;
-        reqID++;
-
-        System.out.println("Clearing cache for the user...");
-        byte[] request_msg = marshal(new byte[] {}, reqID, serviceID);
-        byte[] response_msg = sendMessage(request_msg);
-        System.out.println("Cache cleared!");
     }
 
     private byte[] marshal(byte[] msg_bytes, int reqID, int serviceID) {
