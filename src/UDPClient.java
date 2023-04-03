@@ -6,7 +6,6 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.regex.PatternSyntaxException;
 
 /**
  * Functionality of UDP Client
@@ -18,7 +17,7 @@ public class UDPClient {
     private int reqID;
 
     public UDPClient(int serverPort) throws SocketException, UnknownHostException {
-        this.aHost = InetAddress.getByName("159.223.54.186");
+        this.aHost = InetAddress.getByName("127.0.0.1");
         this.port = serverPort;
         this.reqID = Math.abs(UUID.randomUUID().hashCode());
         this.clientSocket = new DatagramSocket();
