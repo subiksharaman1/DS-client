@@ -9,7 +9,7 @@ public class Main {
 
 	public static void main(String[] args) throws SocketException, UnknownHostException {
 		int argPort = 65535;
-		String argServerAddr = "127.0.0.1";
+		String argServerAddr = "159.223.54.186";
 		int argServerPort = 8888;
 
 		// menu
