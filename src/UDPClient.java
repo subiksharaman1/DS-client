@@ -178,7 +178,7 @@ public class UDPClient {
         } catch (Exception e) {
             System.out.println("Sorry! You cannot book that many seats at once!");
         }
-        
+
     }
 
     public void monitorUpdates() {
@@ -236,10 +236,21 @@ public class UDPClient {
                             clientSocket.receive(packet);
 
                             // convert the received data to a string
-                            String message = new String(packet.getData(), 0, packet.getLength(), "UTF-8");
+
+                            // String message = new String(packet.getData(), 0, packet.getLength(),
+                            // "UTF-8");
 
                             // process notification
-                            System.out.println("Received message from server: " + message);
+                            // System.out.println("Received message from server: " + message);
+
+                            System.out.println("Decoding...");
+                            byte[] buf = packet.getData();
+                            int notif_id = UIUtils.extractReqId(buf);
+                            int notif_flight = UIUtils.extractStatusCode(buf);
+                            byte[] notif_seatsLeft = UIUtils.extractPayload(buf);
+                            System.out.println("RequestID: " + notif_id);
+                            System.out.println("Flight Number: " + notif_flight);
+                            System.out.println("Seats Left: " + UIUtils.unmarshalInt(notif_seatsLeft));
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -318,9 +329,7 @@ public class UDPClient {
         System.out.println("StatusCode: " + status_code);
 
         try {
-            int response = UIUtils.unmarshalInt(payload);
-
-            if (response == 1) {
+            if (status_code == 201) {
                 System.out.println("Sucessfully refunded! Please come again!");
             } else {
                 System.out.println("Unable to refund. Please try again!");
